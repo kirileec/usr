@@ -4,9 +4,9 @@
  *
  * @category system
  * @package AutoSlug
- * @author ShingChi
- * @version 1.0.0
- * @link http://lcz.me
+ * @author Kirile
+ * @version 2.0.0
+ * @link http://kirile.gq/
  */
 class AutoSlug_Plugin implements Typecho_Plugin_Interface
 {
@@ -22,7 +22,7 @@ class AutoSlug_Plugin implements Typecho_Plugin_Interface
         Typecho_Plugin::factory('Widget_Contents_Post_Edit')->write = array('AutoSlug_Plugin', 'render');
         Typecho_Plugin::factory('Widget_Contents_Page_Edit')->write = array('AutoSlug_Plugin', 'render');
 
-        return _t('请配置此插件的API KEY, 以使您的插件生效');
+        return _t('请配置此插件的API APPID 和 密钥, 以使您的插件生效');
     }
 
     /**
@@ -47,11 +47,17 @@ class AutoSlug_Plugin implements Typecho_Plugin_Interface
         /** 百度应用 API Key */
         $apiKey = new Typecho_Widget_Helper_Form_Element_Text(
             'apiKey', NULL, '',
-            _t('百度应用 API Key'),
-            _t('<a href="http://developer.baidu.com/dev">获取 API Key</a>')
+            _t('百度翻译 API APPID'),
+            _t('<a href="http://api.fanyi.baidu.com/api/trans/product/desktop">获取 API APPID</a>')
         );
         $form->addInput($apiKey);
-
+        /** 百度应用 API 密钥 */
+        $apiSec = new Typecho_Widget_Helper_Form_Element_Text(
+            'apiSec', NULL, '',
+            _t('百度翻译 API 密钥'),
+            _t('<a href="http://api.fanyi.baidu.com/api/trans/product/desktop">获取 API 密钥</a>')
+        );
+        $form->addInput($apiSec);
         /** 生成模式 */
         $mode = new Typecho_Widget_Helper_Form_Element_Radio(
             'mode',
@@ -109,7 +115,7 @@ class AutoSlug_Plugin implements Typecho_Plugin_Interface
             return new Pinyin();
         } else {
             require_once 'AutoSlug/lib/Translate.php';
-            return new DuTranslate($settings->apiKey);
+            return new DuTranslate($settings->apiKey,$settings->apiSec);
         }
     }
 }
