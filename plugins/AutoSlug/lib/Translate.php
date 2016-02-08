@@ -1,29 +1,24 @@
 <?php
-/**
- * 百度翻译
- *
- * @package DuTranslate
- * @version 1.0
- * @link https://github.com/typecho-fans/plugins/tree/master/AutoSlug/
- * @license GNU General Public License 2.0
- */
 class DuTranslate
 {
-    /** 百度应用 API Key */
-    private $_apiKey;
+    /** 百度翻译 API APPID */
+    private $_apiID;
+    /** 百度翻译 API 密钥 */
+    private $_apiSec;
 
     /**
      * 构造函数
      *
-     * @param string $apiKey 百度应用 API Key
+     * @param string $apiKey 百度翻译 API APPID
+     * @param string $apiSec 百度翻译 API 密钥
      * @return void
      */
-    public function __construct($apiKey = NULL)
+    public function __construct($apiKey = NULL,$apiSec = NULL)
     {
-        /** 获取 API Key */
-        $this->_apiKey = $apiKey;
+        /** 获取 API APPID 和 密钥 */
+        $this->_apiID = $apiKey;
+        $this->_apiSec = $apiSec;
     }
-
     /**
      * 翻译
      *
@@ -36,13 +31,17 @@ class DuTranslate
     public function transform($word, $from = 'zh', $to = 'en')
     {
         /** 构建请求地址及参数 */
-        $url = 'http://openapi.baidu.com/public/2.0/bmt/translate';
+        $url = 'http://api.fanyi.baidu.com/api/trans/vip/translate';
         $post = array(
-            'client_id' => $this->_apiKey,
             'q' => $word,
+            'appid' => $this->_apiID,
+            'salt' => rand(10000,99999),
             'from' => $from,
-            'to' => $to
+            'to' => $to,
         );
+        /** 拼接生成签名 */
+        $str = $this->_apiID.$word.$post['salt'].$this->_apiSec;
+        $post['sign'] = md5($str);
 
         /** 配置 cURL 选项 */
         $options = array(
@@ -59,7 +58,6 @@ class DuTranslate
             return false;
         }
         curl_close($ch);
-
         $result = json_decode($result, true);
 
         /** 返回翻译错误 */
@@ -74,4 +72,5 @@ class DuTranslate
 
         return $result;
     }
+
 }
